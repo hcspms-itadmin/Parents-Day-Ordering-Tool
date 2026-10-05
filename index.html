@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家長日食物點餐系統 - Parents' Day Food Ordering System</title>
+    <!-- Tailwind CSS for utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Helvetica Neue", "Segoe UI", Microsoft JhengHei, sans-serif;
+            background-color: #f3f4f6;
+            touch-action: manipulation;
+        }
+
+        /* Standard Card Button Style matching provided designs */
+        .card-btn {
+            background-color: #fffde7;
+            border: 2px solid #fff59d;
+            border-radius: 16px;
+            padding: 18px 16px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            text-align: center;
+            width: 100%;
+            display: block;
+            user-select: none;
+        }
+
+        .card-btn:hover {
+            background-color: #fff9c4;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-btn:active {
+            transform: scale(0.97);
+            background-color: #fff59d;
+        }
+
+        /* Red Cancel/Reset Button Style */
+        .card-btn-red {
+            background-color: #ff5252;
+            border: 2px solid #ff1744;
+            color: #ffffff !important;
+        }
+
+        .card-btn-red:hover {
+            background-color: #f44336;
+        }
+
+        .card-btn-red:active {
+            background-color: #d32f2f;
+        }
+
+        .card-btn-red .btn-jyutping,
+        .card-btn-red .btn-text,
+        .card-btn-red .btn-english {
+            color: #ffffff !important;
+        }
+
+        /* Stage Tab Buttons */
+        .stage-tab {
+            background-color: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            color: #334155;
+            font-weight: bold;
+            padding: 10px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .stage-tab.active {
+            background-color: #1e73be;
+            border-color: #1565c0;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(30, 115, 190, 0.3);
+        }
+
+        /* Multi-language Typography Helpers */
+        .btn-jyutping {
+            color: #1e73be;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .btn-text {
+            color: #111827;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 2px;
+            line-height: 1.25;
+        }
+
+        .btn-english {
+            color: #2e7d32;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        /* Page View Switcher */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-3 sm:p-6">
+
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-gray-100 p-5 sm:p-8 relative overflow-hidden">
+        
+        <!-- Header / Logo area (Static Title Header) -->
+        <div class="text-center pb-4 mb-4 border-b border-gray-100">
+            <span class="inline-block px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full mb-1">
+                🏫 家長日學生服務隊 Parents' Day Student Service
+            </span>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PAGE 1: HOME PAGE                          -->
+        <!-- ========================================== -->
+        <div id="page-home" class="page active text-center">
+            <div class="mb-6">
+                <div class="btn-jyutping text-base sm:text-lg">nei5 hou2 , ceng2 man6 sik6 me1 ?</div>
+                <div class="text-3xl sm:text-4xl font-extrabold text-gray-900 my-1">你好，請問食咩？</div>
+                <div class="btn-english text-base sm:text-lg">Hello, what would you like to eat?</div>
+            </div>
+
+            <div class="space-y-4">
+                <button class="card-btn" onclick="goToStageSelection()">
+                    <div class="btn-jyutping">hoi1 ci2 dim2 caan1</div>
+                    <div class="btn-text">👉 開始點餐</div>
+                    <div class="btn-english">Start Ordering</div>
+                </button>
+
+                <button class="card-btn" onclick="showHistoryModal()">
+                    <div class="btn-jyutping">dim2 caan1 gei3 luk6</div>
+                    <div class="btn-text">📋 點餐記錄</div>
+                    <div class="btn-english">Order History</div>
+                </button>
+
+                <button class="card-btn" onclick="showHistoryModal()">
+                    <div class="btn-jyutping">coen4 bou2 li5 si2 gei3 luk6</div>
+                    <div class="btn-text">📚 所有歷史記錄</div>
+                    <div class="btn-english">All History Records</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PAGE 2: CLASS SELECTION                    -->
+        <!-- ========================================== -->
+        <div id="page-class" class="page text-center">
+            <div class="mb-5">
+                <div class="btn-jyutping">ceng2 gaa2 baan1 bit6</div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-gray-900 my-1">請揀班別</div>
+                <div class="btn-english">Please select a class</div>
+            </div>
+
+            <!-- Stage Tabs (KS1 / KS2 / KS3 / KS4) -->
+            <div class="flex gap-1.5 mb-5 bg-gray-50 p-1.5 rounded-2xl border border-gray-200">
+                <button id="tab-KS1" class="stage-tab active" onclick="switchStage('KS1')">KS1</button>
+                <button id="tab-KS2" class="stage-tab" onclick="switchStage('KS2')">KS2</button>
+                <button id="tab-KS3" class="stage-tab" onclick="switchStage('KS3')">KS3</button>
+                <button id="tab-KS4" class="stage-tab" onclick="switchStage('KS4')">KS4</button>
+            </div>
+
+            <!-- Class Buttons Container -->
+            <div id="class-buttons-container" class="grid grid-cols-2 gap-3 max-h-72 overflow-y-auto p-1 mb-4">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <button class="card-btn card-btn-red py-3" onclick="showPage('page-home')">
+                <div class="btn-jyutping">faan1 wui4</div>
+                <div class="btn-text text-xl">↩️ 返回首頁</div>
+                <div class="btn-english">Back to Home</div>
+            </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PAGE 3: FOOD CATEGORY SELECTION            -->
+        <!-- ========================================== -->
+        <div id="page-category" class="page text-center">
+            <div class="mb-5">
+                <div class="btn-jyutping">ceng2 gaa2 zung2 leoi6</div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-gray-900 my-1">請揀種類</div>
+                <div class="btn-english">Please select a category</div>
+            </div>
+
+            <!-- Current Selected Class Display Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 text-blue-800 rounded-full mb-6 text-sm font-bold">
+                <span>班別 Class:</span>
+                <span id="display-selected-class" class="text-base text-blue-900 font-extrabold">--</span>
+            </div>
+
+            <div class="space-y-4">
+                <button class="card-btn" onclick="selectFood('曲奇', 'guk1 gei4', 'Cookies', '🍪')">
+                    <div class="btn-jyutping">guk1 gei4</div>
+                    <div class="btn-text">🍪 曲奇</div>
+                    <div class="btn-english">Cookies</div>
+                </button>
+
+                <button class="card-btn" onclick="selectFood('Muffin蛋糕', 'Muffin daan6 gou1', 'Muffin', '🧁')">
+                    <div class="btn-jyutping">Muffin daan6 gou1</div>
+                    <div class="btn-text">🧁 Muffin蛋糕</div>
+                    <div class="btn-english">Muffin</div>
+                </button>
+
+                <button class="card-btn card-btn-red py-3" onclick="showPage('page-class')">
+                    <div class="btn-jyutping">cung4 san1 gaa2 baan1 bit6</div>
+                    <div class="btn-text text-xl">❌ 重新揀班別</div>
+                    <div class="btn-english">Reselect Class</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PAGE 4: CONFIRM ORDER                      -->
+        <!-- ========================================== -->
+        <div id="page-confirm" class="page text-center">
+            <div class="mb-4">
+                <div class="btn-jyutping">kok3 jam6 haa6 daan1</div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-gray-900 my-1">確認訂單</div>
+                <div class="btn-english">Confirm Order</div>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="bg-amber-50/60 border-2 border-amber-200 rounded-2xl p-5 mb-5 text-center shadow-inner space-y-3">
+                <div class="pb-2 border-b border-amber-200/60">
+                    <div class="text-xs text-gray-500 font-semibold mb-1">班別 / Class</div>
+                    <div id="summary-class" class="text-2xl font-black text-blue-900">--</div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 font-semibold mb-1">食物 / Food</div>
+                    <div id="summary-food-jp" class="btn-jyutping">--</div>
+                    <div id="summary-food-zh" class="text-3xl font-black text-gray-900 my-0.5">--</div>
+                    <div id="summary-food-en" class="btn-english">--</div>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <button class="card-btn" onclick="confirmAndSaveOrder()">
+                    <div class="btn-jyutping">kok3 jam6 haa6 daan1</div>
+                    <div class="btn-text">✅ 確定下單</div>
+                    <div class="btn-english">Confirm Order</div>
+                </button>
+
+                <button class="card-btn card-btn-red py-3" onclick="showPage('page-category')">
+                    <div class="btn-jyutping">cung4 san1 gaa2</div>
+                    <div class="btn-text text-xl">❌ 重新揀</div>
+                    <div class="btn-english">Select Again</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PAGE 5: ORDER COMPLETED SUCCESS             -->
+        <!-- ========================================== -->
+        <div id="page-success" class="page text-center">
+            <div class="py-2 mb-4">
+                <div class="text-5xl mb-3 animate-bounce">🎉</div>
+                <div class="btn-jyutping text-base">daan1 daan1 jyun4 sing4 !</div>
+                <div class="text-3xl font-black text-gray-900 my-1">訂單完成！</div>
+                <div class="btn-english text-base">Order completed!</div>
+            </div>
+
+            <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6">
+                <div class="btn-jyutping">doh1 ze6 gwong1 lam4</div>
+                <div class="text-2xl font-bold text-green-900 my-0.5">多謝光臨</div>
+                <div class="btn-english">Thank you for coming</div>
+            </div>
+
+            <div class="space-y-3">
+                <button class="card-btn" onclick="showPage('page-home')">
+                    <div class="btn-jyutping">faan1 wui4 sau2 jip6</div>
+                    <div class="btn-text">🏠 返回首頁</div>
+                    <div class="btn-english">Back to Home</div>
+                </button>
+
+                <button class="card-btn" onclick="showHistoryModal()">
+                    <div class="btn-jyutping">caa4 hon1 dim2 caan1 gei3 luk6</div>
+                    <div class="btn-text">📋 查看點餐記錄</div>
+                    <div class="btn-english">View Order History</div>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- HISTORY MODAL POPUP                        -->
+    <!-- ========================================== -->
+    <div id="history-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            
+            <div class="flex justify-between items-center border-b pb-3 mb-3">
+                <div>
+                    <h3 class="text-xl font-black text-gray-900">📋 點餐歷史記錄</h3>
+                    <p class="text-xs text-gray-500">Order History Log</p>
+                </div>
+                <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold px-2">×</button>
+            </div>
+
+            <!-- Log Table List Container -->
+            <div id="history-list-container" class="flex-1 overflow-y-auto space-y-2.5 my-2 pr-1">
+                <!-- Log entries inserted here dynamically -->
+            </div>
+
+            <div class="border-t pt-3 mt-2 flex gap-2">
+                <button onclick="clearHistoryLog()" class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-xl transition">
+                    🗑️ 清除紀錄 Clear
+                </button>
+                <button onclick="closeHistoryModal()" class="flex-1 py-2.5 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl transition">
+                    關閉 Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC                           -->
+    <!-- ========================================== -->
+    <script>
+        // Class mapping structure by key stages
+        const classesData = {
+            'KS1': ['KS1A', 'KS1B', 'KS1C', 'KS1D', 'KS1E', 'KS1F'],
+            'KS2': ['KS2A', 'KS2B', 'KS2C', 'KS2D', 'KS2E'],
+            'KS3': ['KS3A', 'KS3B', 'KS3C', 'KS3D', 'KS3E'],
+            'KS4': ['KS4A', 'KS4B', 'KS4C', 'KS4D']
+        };
+
+        // Jyutping mapping for classes
+        const classJyutping = {
+            'KS1A': 'KS1A baan1', 'KS1B': 'KS1B baan1', 'KS1C': 'KS1C baan1', 'KS1D': 'KS1D baan1', 'KS1E': 'KS1E baan1', 'KS1F': 'KS1F baan1',
+            'KS2A': 'KS2A baan1', 'KS2B': 'KS2B baan1', 'KS2C': 'KS2C baan1', 'KS2D': 'KS2D baan1', 'KS2E': 'KS2E baan1',
+            'KS3A': 'KS3A baan1', 'KS3B': 'KS3B baan1', 'KS3C': 'KS3C baan1', 'KS3D': 'KS3D baan1', 'KS3E': 'KS3E baan1',
+            'KS4A': 'KS4A baan1', 'KS4B': 'KS4B baan1', 'KS4C': 'KS4C baan1', 'KS4D': 'KS4D baan1'
+        };
+
+        // Current Ordering State
+        let currentOrder = {
+            selectedClass: '',
+            foodZh: '',
+            foodJp: '',
+            foodEn: '',
+            foodIcon: ''
+        };
+
+        let currentActiveStage = 'KS1';
+
+        // Page view controller
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Initialize class selection step
+        function goToStageSelection() {
+            switchStage(currentActiveStage);
+            showPage('page-class');
+        }
+
+        // Switch between KS1, KS2, KS3, KS4 tabs
+        function switchStage(stageKey) {
+            currentActiveStage = stageKey;
+
+            // Update tab active classes
+            ['KS1', 'KS2', 'KS3', 'KS4'].forEach(stage => {
+                const tabEl = document.getElementById(tab-${stage});
+                if (stage === stageKey) {
+                    tabEl.classList.add('active');
+                } else {
+                    tabEl.classList.remove('active');
+                }
+            });
+
+            // Populate class buttons for selected stage
+            const container = document.getElementById('class-buttons-container');
+            container.innerHTML = '';
+
+            classesData[stageKey].forEach(cls => {
+                const btn = document.createElement('button');
+                btn.className = 'card-btn py-3 mb-0';
+                btn.onclick = () => selectClass(cls);
+                btn.innerHTML = `
+                    <div class="btn-jyutping text-xs">${classJyutping[cls] || cls}</div>
+                    <div class="btn-text text-xl sm:text-2xl">${cls}</div>
+                    <div class="btn-english text-xs">Class ${cls}</div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        // Select Class & proceed to Category selection
+        function selectClass(className) {
+            currentOrder.selectedClass = className;
+            document.getElementById('display-selected-class').innerText = className;
+            showPage('page-category');
+        }
+
+        // Select Food Item & proceed to Confirmation
+        function selectFood(zh, jp, en, icon) {
+            currentOrder.foodZh = zh;
+            currentOrder.foodJp = jp;
+            currentOrder.foodEn = en;
+            currentOrder.foodIcon = icon;
+
+            // Populate summary view
+            document.getElementById('summary-class').innerText = currentOrder.selectedClass;
+            document.getElementById('summary-food-jp').innerText = jp;
+            document.getElementById('summary-food-zh').innerText = ${icon} ${zh};
+            document.getElementById('summary-food-en').innerText = en;
+
+            showPage('page-confirm');
+        }
+
+        // Confirm & save order to LocalStorage
+        function confirmAndSaveOrder() {
+            const timestamp = new Date().toLocaleString('zh-HK', { 
+                month: 'numeric', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false 
+            });
+
+            const orderLogEntry = {
+                id: Date.now(),
+                class: currentOrder.selectedClass,
+                food: ${currentOrder.foodIcon} ${currentOrder.foodZh},
+                foodEn: currentOrder.foodEn,
+                time: timestamp
+            };
+
+            // Save to LocalStorage
+            let history = JSON.parse(localStorage.getItem('parent_day_orders') || '[]');
+            history.unshift(orderLogEntry);
+            localStorage.setItem('parent_day_orders', JSON.stringify(history));
+
+            // Proceed to success page
+            showPage('page-success');
+        }
+
+        // Display history modal and list entries
+        function showHistoryModal() {
+            const container = document.getElementById('history-list-container');
+            const history = JSON.parse(localStorage.getItem('parent_day_orders') || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <p class="text-3xl mb-1">📭</p>
+                        <p class="text-sm font-medium">暫無點餐記錄</p>
+                        <p class="text-xs">No order records yet</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = history.map((item, idx) => `
+                    <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 flex justify-between items-center text-left">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 bg-blue-600 text-white font-black text-xs rounded-md">${item.class}</span>
+                                <span class="font-extrabold text-gray-900 text-base">${item.food}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">🕒 ${item.time}</div>
+                        </div>
+                        <span class="text-xs font-bold text-gray-400">#${history.length - idx}</span>
+                    </div>
+                `).join('');
+            }
+
+            const modal = document.getElementById('history-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function clearHistoryLog() {
+            if (confirm("確定要清除所有點餐記錄嗎？\nAre you sure you want to clear all history?")) {
+                localStorage.removeItem('parent_day_orders');
+                showHistoryModal();
+            }
+        }
+    </script>
+</body>
+</html>
