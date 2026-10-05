@@ -385,11 +385,13 @@
 
             // Update tab active classes
             ['KS1', 'KS2', 'KS3', 'KS4'].forEach(stage => {
-                const tabEl = document.getElementById(tab-${stage});
-                if (stage === stageKey) {
-                    tabEl.classList.add('active');
-                } else {
-                    tabEl.classList.remove('active');
+                const tabEl = document.getElementById(`tab-${stage}`);
+                if (tabEl) {
+                    if (stage === stageKey) {
+                        tabEl.classList.add('active');
+                    } else {
+                        tabEl.classList.remove('active');
+                    }
                 }
             });
 
@@ -427,7 +429,7 @@
             // Populate summary view
             document.getElementById('summary-class').innerText = currentOrder.selectedClass;
             document.getElementById('summary-food-jp').innerText = jp;
-            document.getElementById('summary-food-zh').innerText = ${icon} ${zh};
+            document.getElementById('summary-food-zh').innerText = `${icon} ${zh}`;
             document.getElementById('summary-food-en').innerText = en;
 
             showPage('page-confirm');
@@ -447,7 +449,7 @@
             const orderLogEntry = {
                 id: Date.now(),
                 class: currentOrder.selectedClass,
-                food: ${currentOrder.foodIcon} ${currentOrder.foodZh},
+                food: `${currentOrder.foodIcon} ${currentOrder.foodZh}`,
                 foodEn: currentOrder.foodEn,
                 time: timestamp
             };
